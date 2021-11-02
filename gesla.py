@@ -83,7 +83,7 @@ class GeslaDataset:
                 return data
 
     def files_to_xarray(self, filenames):
-        """Read a list of GESLA filenames into an xarray.Dataset object. The 
+        """Read a list of GESLA filenames into a xarray.Dataset object. The 
         dataset includes variables containing metadata for each record.
 
         Args:
@@ -109,7 +109,7 @@ class GeslaDataset:
             force_xarray (bool, optional): if N=1, the default behavior is to 
                 return a pandas.DataFrame object containing data/flags and a 
                 pandas.Series object containing metadata. Set this argument to 
-                True to return an xarray Dataset even if N=1. Defaults to False.
+                True to return a xarray Dataset even if N=1. Defaults to False.
 
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
@@ -141,7 +141,7 @@ class GeslaDataset:
         east_lon=180,
         force_xarray=False,
     ):
-        """Load GESLA records within a rectangular lat/lon range into an xarray.
+        """Load GESLA records within a rectangular lat/lon range into a xarray.
         Dataset object.
 
         Args:
@@ -157,7 +157,7 @@ class GeslaDataset:
                 lat/lon range, the default behavior is to return a pandas.
                 DataFrame object containing data/flags and a pandas.Series 
                 object containing metadata. Set this argument to True to return 
-                an xarray Dataset even if only one record is selected. Defaults 
+                a xarray Dataset even if only one record is selected. Defaults 
                 to False.
 
         Returns:
