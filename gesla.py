@@ -165,11 +165,10 @@ class GeslaDataset:
             east_lon (float, optional): eastern extent of the range. Defaults
                 to 180.
             force_xarray (bool, optional): if there is only one record in the
-                lat/lon range, the default behavior is to return a pandas.
-                DataFrame object containing data/flags and a pandas.Series
-                object containing metadata. Set this argument to True to return
-                a xarray Dataset even if only one record is selected. Defaults
-                to False.
+                lat/lon range, the default behavior is to return a 
+                pandas.DataFrame object containing data/flags and a 
+                pandas.Series object containing metadata. Set this argument to 
+                True to return a xarray.Dataset even if only one record is selected. Defaults to False.
 
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
