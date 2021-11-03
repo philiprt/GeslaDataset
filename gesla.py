@@ -168,7 +168,8 @@ class GeslaDataset:
                 lat/lon range, the default behavior is to return a 
                 pandas.DataFrame object containing data/flags and a 
                 pandas.Series object containing metadata. Set this argument to 
-                True to return a xarray.Dataset even if only one record is selected. Defaults to False.
+                True to return a xarray.Dataset even if only one record is 
+                selected. Defaults to False.
 
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
