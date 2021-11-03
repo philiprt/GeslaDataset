@@ -5,9 +5,9 @@ import warnings
 
 class GeslaDataset:
     """A class for loading data from GESLA text files into convenient in-memory
-    data objects. By default, single file requests are loaded into 
-    `pandas.DataFrame` objects, which are similar to in-memory spreadsheets. 
-    Multifile requests are loaded into `xarray.Dataset` objects, which are 
+    data objects. By default, single file requests are loaded into
+    `pandas.DataFrame` objects, which are similar to in-memory spreadsheets.
+    Multifile requests are loaded into `xarray.Dataset` objects, which are
     similar to in-memory NetCDF files."""
 
     def __init__(self, meta_file, data_path):
@@ -131,7 +131,7 @@ class GeslaDataset:
         """
         N = int(N)
         if N <= 0:
-            raise ("Must specify N > 0")
+            raise Exception("Must specify N > 0")
 
         d = (self.meta.longitude - lon) ** 2 + (self.meta.latitude - lat) ** 2
         idx = d.sort_values().iloc[:N].index
@@ -165,10 +165,10 @@ class GeslaDataset:
             east_lon (float, optional): eastern extent of the range. Defaults
                 to 180.
             force_xarray (bool, optional): if there is only one record in the
-                lat/lon range, the default behavior is to return a 
-                pandas.DataFrame object containing data/flags and a 
-                pandas.Series object containing metadata. Set this argument to 
-                True to return a xarray.Dataset even if only one record is 
+                lat/lon range, the default behavior is to return a
+                pandas.DataFrame object containing data/flags and a
+                pandas.Series object containing metadata. Set this argument to
+                True to return a xarray.Dataset even if only one record is
                 selected. Defaults to False.
 
         Returns:
