@@ -6,7 +6,7 @@ import warnings
 class GeslaDataset:
     """A class for loading data from GESLA text files into convenient in-memory
     data objects. By default, single file requests are loaded into 
-    `pandas.DataFrame` objects, which are similar to in-memory spreadhseets. 
+    `pandas.DataFrame` objects, which are similar to in-memory spreadsheets. 
     Multifile requests are loaded into `xarray.Dataset` objects, which are 
     similar to in-memory NetCDF files."""
 
@@ -158,7 +158,7 @@ class GeslaDataset:
         Args:
             south_lat (float, optional): southern extent of the range. Defaults
                 to -90.
-            north_lat (float, optional): norhtern extent of the range. Defaults
+            north_lat (float, optional): northern extent of the range. Defaults
                 to 90.
             west_lon (float, optional): western extent of the range. Defaults
                 to -180.
