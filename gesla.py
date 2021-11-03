@@ -113,7 +113,7 @@ class GeslaDataset:
         return data
 
     def load_N_closest(self, lat, lon, N=1, force_xarray=False):
-        """Load the N closest GESLA records to a lat/lon location into an
+        """Load the N closest GESLA records to a lat/lon location into a
         xarray.Dataset object. The dataset includes variables containing
         metadata for each record.
 
