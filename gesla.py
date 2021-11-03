@@ -4,18 +4,18 @@ import warnings
 
 
 class GeslaDataset:
-    """A class for loading data from GESLA text files into convenient in-memory 
-    data objects. By default, single file requests are loaded into pandas.
-    DataFrame objects, which are similar to in-memory spreadhseets. Multifile 
-    requests are loaded into xarray.Dataset objects, which are similar to 
-    in-memory NetCDF files."""
+    """A class for loading data from GESLA text files into convenient in-memory
+    data objects. By default, single file requests are loaded into 
+    `pandas.DataFrame` objects, which are similar to in-memory spreadhseets. 
+    Multifile requests are loaded into `xarray.Dataset` objects, which are 
+    similar to in-memory NetCDF files."""
 
     def __init__(self, meta_file, data_path):
         """Initialize loading data from a GESLA database.
 
         Args:
             meta_file (string): path to the metadata file in .csv format.
-            data_path (string): path to the directory containing GESLA data 
+            data_path (string): path to the directory containing GESLA data
                 files.
         """
         self.meta = pd.read_csv(meta_file)
@@ -49,17 +49,17 @@ class GeslaDataset:
         )
 
     def file_to_pandas(self, filename, return_meta=True):
-        """Read a GESLA data file into a pandas.DataFrame object. Metadata is 
+        """Read a GESLA data file into a pandas.DataFrame object. Metadata is
         returned as a pandas.Series object.
 
         Args:
             filename (string): name of the GESLA data file. Do not prepend path.
-            return_meta (bool, optional): determines if metadata is returned as 
+            return_meta (bool, optional): determines if metadata is returned as
                 a second function output. Defaults to True.
 
         Returns:
             pandas.DataFrame: sea-level values and flags with datetime index.
-            pandas.Series: record metadata. This return can be excluded by 
+            pandas.Series: record metadata. This return can be excluded by
                 setting return_meta=False.
         """
         with open(self.data_path + filename, "r") as f:
@@ -74,7 +74,9 @@ class GeslaDataset:
             if data.index[data.index.duplicated()].size > 0:
                 data = data.drop_duplicates()
                 warnings.warn(
-                    "Duplicate timestamps in file " + filename + " were removed.",
+                    "Duplicate timestamps in file "
+                    + filename
+                    + " were removed.",
                 )
             if return_meta:
                 meta = self.meta.loc[self.meta.filename == filename].iloc[0]
@@ -83,7 +85,7 @@ class GeslaDataset:
                 return data
 
     def files_to_xarray(self, filenames):
-        """Read a list of GESLA filenames into a xarray.Dataset object. The 
+        """Read a list of GESLA filenames into a xarray.Dataset object. The
         dataset includes variables containing metadata for each record.
 
         Args:
@@ -92,23 +94,36 @@ class GeslaDataset:
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
         """
-        return xr.concat(
-            [self.file_to_pandas(f, return_meta=False).to_xarray() for f in filenames],
+        data = xr.concat(
+            [
+                self.file_to_pandas(f, return_meta=False).to_xarray()
+                for f in filenames
+            ],
             dim="station",
         )
 
+        idx = [
+            s.Index for s in self.meta.itertuples() if s.filename in filenames
+        ]
+        meta = self.meta.loc[idx]
+        meta.index = range(meta.index.size)
+        meta.index.name = "station"
+        data = data.assign({c: meta[c] for c in meta.columns})
+
+        return data
+
     def load_N_closest(self, lat, lon, N=1, force_xarray=False):
-        """Load the N closest GESLA records to a lat/lon location into an 
-        xarray.Dataset object. The dataset includes variables containing 
+        """Load the N closest GESLA records to a lat/lon location into an
+        xarray.Dataset object. The dataset includes variables containing
         metadata for each record.
 
         Args:
             lat (float): latitude on the interval [-90, 90]
             lon (float): longitude on the interval [-180, 180]
             N (int, optional): number of locations to load. Defaults to 1.
-            force_xarray (bool, optional): if N=1, the default behavior is to 
-                return a pandas.DataFrame object containing data/flags and a 
-                pandas.Series object containing metadata. Set this argument to 
+            force_xarray (bool, optional): if N=1, the default behavior is to
+                return a pandas.DataFrame object containing data/flags and a
+                pandas.Series object containing metadata. Set this argument to
                 True to return a xarray Dataset even if N=1. Defaults to False.
 
         Returns:
@@ -123,11 +138,7 @@ class GeslaDataset:
         meta = self.meta.loc[idx]
 
         if (N > 1) or force_xarray:
-            meta.index = range(meta.index.size)
-            meta.index.name = "station"
-            data = self.files_to_xarray(meta.filename)
-            data = data.assign({c: meta[c] for c in meta.columns})
-            return data
+            return self.files_to_xarray(meta.filename.tolist())
 
         else:
             data, meta = self.file_to_pandas(meta.filename.values[0])
@@ -145,19 +156,19 @@ class GeslaDataset:
         Dataset object.
 
         Args:
-            south_lat (float, optional): southern extent of the range. Defaults 
+            south_lat (float, optional): southern extent of the range. Defaults
                 to -90.
-            north_lat (float, optional): norhtern extent of the range. Defaults 
+            north_lat (float, optional): norhtern extent of the range. Defaults
                 to 90.
-            west_lon (float, optional): western extent of the range. Defaults 
+            west_lon (float, optional): western extent of the range. Defaults
                 to -180.
-            east_lon (float, optional): eastern extent of the range. Defaults 
+            east_lon (float, optional): eastern extent of the range. Defaults
                 to 180.
-            force_xarray (bool, optional): if there is only one record in the 
+            force_xarray (bool, optional): if there is only one record in the
                 lat/lon range, the default behavior is to return a pandas.
-                DataFrame object containing data/flags and a pandas.Series 
-                object containing metadata. Set this argument to True to return 
-                a xarray Dataset even if only one record is selected. Defaults 
+                DataFrame object containing data/flags and a pandas.Series
+                object containing metadata. Set this argument to True to return
+                a xarray Dataset even if only one record is selected. Defaults
                 to False.
 
         Returns:
@@ -171,15 +182,13 @@ class GeslaDataset:
             lon_bool = (self.meta.longitude >= west_lon) & (
                 self.meta.longitude <= east_lon
             )
-        lat_bool = (self.meta.latitude >= south_lat) & (self.meta.latitude <= north_lat)
+        lat_bool = (self.meta.latitude >= south_lat) & (
+            self.meta.latitude <= north_lat
+        )
         meta = self.meta.loc[lon_bool & lat_bool]
 
         if (meta.index.size > 1) or force_xarray:
-            meta.index = range(meta.index.size)
-            meta.index.name = "station"
-            data = self.files_to_xarray(meta.filename)
-            data = data.assign({c: meta[c] for c in meta.columns})
-            return data
+            return self.files_to_xarray(meta.filename.tolist())
 
         else:
             data, meta = self.file_to_pandas(meta.filename.values[0])
