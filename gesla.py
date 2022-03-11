@@ -59,8 +59,9 @@ class GeslaDataset:
                 parse_dates=[[0, 1]],
                 index_col=0,
             )
-            if data.index[data.index.duplicated()].size > 0:
-                data = data.drop_duplicates()
+            duplicates = data.index.duplicated()
+            if duplicates.sum() > 0:
+                data = data.loc[~duplicates]
                 warnings.warn(
                     "Duplicate timestamps in file " + filename + " were removed.",
                 )
