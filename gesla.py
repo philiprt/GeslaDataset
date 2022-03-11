@@ -33,20 +33,8 @@ class GeslaDataset:
         self.meta.loc[:, "end_date_time"] = [
             pd.to_datetime(d) for d in self.meta.loc[:, "end_date_time"]
         ]
+        self.meta.rename(columns={"file_name": "filename"}, inplace=True)
         self.data_path = data_path
-        self.meta["filename"] = self.construct_filenames()
-
-    def construct_filenames(self):
-        return self.meta.apply(
-            lambda x: x.loc["site_name"].lower()
-            + "-"
-            + x.loc["site_code"].lower()
-            + "-"
-            + x.loc["country"].lower()
-            + "-"
-            + x.loc["contributor_abbreviated"].lower(),
-            axis=1,
-        )
 
     def file_to_pandas(self, filename, return_meta=True):
         """Read a GESLA data file into a pandas.DataFrame object. Metadata is
@@ -74,9 +62,7 @@ class GeslaDataset:
             if data.index[data.index.duplicated()].size > 0:
                 data = data.drop_duplicates()
                 warnings.warn(
-                    "Duplicate timestamps in file "
-                    + filename
-                    + " were removed.",
+                    "Duplicate timestamps in file " + filename + " were removed.",
                 )
             if return_meta:
                 meta = self.meta.loc[self.meta.filename == filename].iloc[0]
@@ -95,16 +81,11 @@ class GeslaDataset:
             xarray.Dataset: data, flags, and metadata for each record.
         """
         data = xr.concat(
-            [
-                self.file_to_pandas(f, return_meta=False).to_xarray()
-                for f in filenames
-            ],
+            [self.file_to_pandas(f, return_meta=False).to_xarray() for f in filenames],
             dim="station",
         )
 
-        idx = [
-            s.Index for s in self.meta.itertuples() if s.filename in filenames
-        ]
+        idx = [s.Index for s in self.meta.itertuples() if s.filename in filenames]
         meta = self.meta.loc[idx]
         meta.index = range(meta.index.size)
         meta.index.name = "station"
@@ -182,9 +163,7 @@ class GeslaDataset:
             lon_bool = (self.meta.longitude >= west_lon) & (
                 self.meta.longitude <= east_lon
             )
-        lat_bool = (self.meta.latitude >= south_lat) & (
-            self.meta.latitude <= north_lat
-        )
+        lat_bool = (self.meta.latitude >= south_lat) & (self.meta.latitude <= north_lat)
         meta = self.meta.loc[lon_bool & lat_bool]
 
         if (meta.index.size > 1) or force_xarray:
