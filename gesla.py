@@ -156,7 +156,7 @@ class GeslaDataset:
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
         """
-        if west_lon > 0 & east_lon < 0:
+        if (west_lon > 0) & (east_lon < 0):
             lon_bool = (self.meta.longitude >= west_lon) | (
                 self.meta.longitude <= east_lon
             )
