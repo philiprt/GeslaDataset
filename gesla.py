@@ -1,7 +1,16 @@
 import pandas as pd
+import geopandas as gp
 import xarray as xr
 import warnings
 
+from typing import Dict
+from typing import Optional
+from typing import Union
+
+from shapely.geometry import MultiPolygon
+from shapely.geometry import Polygon
+
+from searvey.utils import get_region
 
 class GeslaDataset:
     """A class for loading data from GESLA text files into convenient in-memory
@@ -128,10 +137,11 @@ class GeslaDataset:
 
     def load_lat_lon_range(
         self,
-        south_lat=-90,
-        north_lat=90,
-        west_lon=-180,
-        east_lon=180,
+        region: Optional[Union[Polygon, MultiPolygon]] = None,
+        south_lat : Optional[float] = None,
+        north_lat : Optional[float] = None,
+        west_lon : Optional[float] = None,
+        east_lon : Optional[float] = None,
         force_xarray=False,
     ):
         """Load GESLA records within a rectangular lat/lon range into a xarray.
@@ -156,16 +166,20 @@ class GeslaDataset:
         Returns:
             xarray.Dataset: data, flags, and metadata for each record.
         """
-        if west_lon > 0 & east_lon < 0:
-            lon_bool = (self.meta.longitude >= west_lon) | (
-                self.meta.longitude <= east_lon
-            )
-        else:
-            lon_bool = (self.meta.longitude >= west_lon) & (
-                self.meta.longitude <= east_lon
-            )
-        lat_bool = (self.meta.latitude >= south_lat) & (self.meta.latitude <= north_lat)
-        meta = self.meta.loc[lon_bool & lat_bool]
+        region = get_region(
+            region=region,
+            lon_min=west_lon,
+            lon_max=east_lon,
+            lat_min=south_lat,
+            lat_max=north_lat,
+            symmetric=True,
+        )
+
+        locations = gp.GeoDataFrame(
+            self.meta, geometry=gp.points_from_xy(self.meta.longitude, self.meta.latitude), crs="EPSG:4326"
+        )
+     
+        meta = self.meta.loc[locations.within(region)]
 
         if (meta.index.size > 1) or force_xarray:
             return self.files_to_xarray(meta.filename.tolist())
